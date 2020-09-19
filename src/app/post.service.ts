@@ -10,6 +10,8 @@ export class PostService{
 
   postSubject = new Subject<Post[]>();
   postsDeleted = new Subject<boolean>();
+  errorErrorError = new Subject<string>();
+  errorStatus = new Subject<string>();
 
   constructor(private http: HttpClient) {}
 
@@ -43,7 +45,12 @@ export class PostService{
       posts => {
         this.postSubject.next(posts);
       }
-    );
+    , error =>{
+      // console.log(error);
+      this.errorErrorError.next(error.error.error);
+      this.errorStatus.next(error.status);
+      // console.log(this.errorOccured);
+    });
   }
 
   onDeletePosts(): void{
