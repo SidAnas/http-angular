@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpEventType, HttpHeaders, HttpParams } from '@angular/common/http';
+import { map, tap } from 'rxjs/operators';
 
 import { Post } from '../app/post.model';
 import { Subject } from 'rxjs';
@@ -21,7 +21,9 @@ export class PostService{
       content: content
     };
 
-    this.http.post<{name: string}>('https://ng-complete-guide-c330c.firebaseio.com/posts.json', post).subscribe(
+    this.http.post<{name: string}>('https://ng-complete-guide-c330c.firebaseio.com/posts.json', post, {
+      observe: 'response'
+    }).subscribe(
       responseData => {
         console.log(responseData);
       }
@@ -29,7 +31,13 @@ export class PostService{
   }
 
   fetchPosts(): void{
-    this.http.get<{[key: string]: Post}>('https://ng-complete-guide-c330c.firebaseio.com/posts.json')
+    let modifiedParam = new HttpParams();
+    modifiedParam = modifiedParam.append('print', 'pretty');
+    modifiedParam = modifiedParam.append('key', 'value');
+    this.http.get<{[key: string]: Post}>('https://ng-complete-guide-c330c.firebaseio.com/posts.json', {
+      headers: new HttpHeaders().set('Custom-header', 'hello'),
+      params: modifiedParam
+    })
     .pipe(
       map( (responseData) => {
         const postArray: Post[] = [];
@@ -54,7 +62,16 @@ export class PostService{
   }
 
   onDeletePosts(): void{
-    this.http.delete('https://ng-complete-guide-c330c.firebaseio.com/posts.json').subscribe(
+    this.http.delete('https://ng-complete-guide-c330c.firebaseio.com/posts.json', {
+      observe: 'events',
+      responseType: 'text'
+    }).pipe(tap(event => {
+      console.log(event);
+      if (event.type === HttpEventType.Response){
+        console.log(event.body);
+      }
+    }))
+    .subscribe(
       () => {
         this.postsDeleted.next(true);
       }
