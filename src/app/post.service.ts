@@ -64,7 +64,7 @@ export class PostService{
   onDeletePosts(): void{
     this.http.delete('https://ng-complete-guide-c330c.firebaseio.com/posts.json', {
       observe: 'events',
-      responseType: 'text'
+      responseType: 'json'
     }).pipe(tap(event => {
       console.log(event);
       if (event.type === HttpEventType.Response){
